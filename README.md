@@ -46,4 +46,4 @@ BriefAI solves this by turning simple business information into ready-to-use mar
 
 ## Current Status
 
-This repository contains the backend services and AI agent workflow powering BriefAI.
+This repository contains the backend services and AI agent workflow powering BriefAI..
