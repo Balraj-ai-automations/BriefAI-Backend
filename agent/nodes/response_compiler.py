@@ -3,7 +3,16 @@ from uuid import uuid4
 from agent.state import BriefAIState
 
 
-def response_compiler(state: BriefAIState) -> BriefAIState:
+def response_compiler_node(
+    state: BriefAIState,
+) -> BriefAIState:
+    """
+    Compile the final API response.
+
+    This node gathers outputs from all previous nodes into
+    a single response object for the frontend.
+    """
+
     print("Running Node 6: Response Compiler")
 
     campaign_id = str(uuid4())

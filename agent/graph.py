@@ -1,18 +1,35 @@
+"""
+LangGraph workflow definition for BriefAI.
+
+This module defines:
+- Graph nodes
+- Execution flow
+- Retry routing
+- Compiled LangGraph application
+"""
+
 from langgraph.graph import StateGraph, END
 
 from agent.state import BriefAIState
 
-from agent.nodes.input_parser import input_parser
-from agent.nodes.strategy_planner import strategy_planner
-from agent.nodes.copy_writer import copy_writer
-from agent.nodes.image_prompt_builder import image_prompt_builder
-from agent.nodes.quality_checker import quality_checker
-from agent.nodes.response_compiler import response_compiler
+# -----------------------------
+# Import LangGraph Nodes
+# -----------------------------
+from agent.nodes.input_parser import input_parser_node
+from agent.nodes.strategy_planner import strategy_planner_node
+from agent.nodes.copy_writer import copy_writer_node
+from agent.nodes.image_prompt_builder import image_prompt_builder_node
+from agent.nodes.quality_checker import quality_checker_node
+from agent.nodes.response_compiler import response_compiler_node
 
 
-def quality_router(state: BriefAIState):
+def quality_router(state: BriefAIState) -> str:
     """
-    Retry logic for Node 5.
+    Route execution after the Quality Checker.
+
+    Returns:
+        "retry" -> Retry copy generation.
+        "pass"  -> Continue to the response compiler.
     """
 
     if (
@@ -24,41 +41,84 @@ def quality_router(state: BriefAIState):
     return "pass"
 
 
+# --------------------------------------------------
+# Build Graph
+# --------------------------------------------------
+
 graph_builder = StateGraph(BriefAIState)
 
-# Nodes
-graph_builder.add_node("input_parser", input_parser)
-graph_builder.add_node("strategy_planner", strategy_planner)
-graph_builder.add_node("copy_writer", copy_writer)
-graph_builder.add_node("image_prompt_builder", image_prompt_builder)
-graph_builder.add_node("quality_checker", quality_checker)
-graph_builder.add_node("response_compiler", response_compiler)
 
-# Entry point
+# --------------------------------------------------
+# Register Nodes
+# --------------------------------------------------
+
+graph_builder.add_node(
+    "input_parser",
+    input_parser_node,
+)
+
+graph_builder.add_node(
+    "strategy_planner",
+    strategy_planner_node,
+)
+
+graph_builder.add_node(
+    "copy_writer",
+    copy_writer_node,
+)
+
+graph_builder.add_node(
+    "image_prompt_builder",
+    image_prompt_builder_node,
+)
+
+graph_builder.add_node(
+    "quality_checker",
+    quality_checker_node,
+)
+
+graph_builder.add_node(
+    "response_compiler",
+    response_compiler_node,
+)
+
+
+# --------------------------------------------------
+# Entry Point
+# --------------------------------------------------
+
 graph_builder.set_entry_point("input_parser")
 
-# Main flow
+
+# --------------------------------------------------
+# Main Workflow
+# --------------------------------------------------
+
 graph_builder.add_edge(
     "input_parser",
-    "strategy_planner"
+    "strategy_planner",
 )
 
 graph_builder.add_edge(
     "strategy_planner",
-    "copy_writer"
+    "copy_writer",
 )
 
 graph_builder.add_edge(
     "copy_writer",
-    "image_prompt_builder"
+    "image_prompt_builder",
 )
 
 graph_builder.add_edge(
     "image_prompt_builder",
-    "quality_checker"
+    "quality_checker",
 )
 
-# Conditional routing
+
+# --------------------------------------------------
+# Conditional Retry Logic
+# --------------------------------------------------
+
 graph_builder.add_conditional_edges(
     "quality_checker",
     quality_router,
@@ -68,9 +128,19 @@ graph_builder.add_conditional_edges(
     },
 )
 
+
+# --------------------------------------------------
+# Finish Workflow
+# --------------------------------------------------
+
 graph_builder.add_edge(
     "response_compiler",
-    END
+    END,
 )
+
+
+# --------------------------------------------------
+# Compile Graph
+# --------------------------------------------------
 
 graph = graph_builder.compile()
