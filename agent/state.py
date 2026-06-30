@@ -28,7 +28,7 @@ class BriefAIState(TypedDict):
     image_prompt: str
     negative_prompt: str
     image_url: str
-    replicate_url: str
+    image_source: str
     aspect_ratio: str
 
     # Node 5 output

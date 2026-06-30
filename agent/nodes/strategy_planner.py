@@ -3,7 +3,7 @@ import logging
 
 from agent.state import BriefAIState
 from prompts.strategy_planner import build_strategy_prompt
-from services.mistral import mistral_service
+from services.mistral import mis/tral_service
 
 logger = logging.getLogger(__name__)
 
