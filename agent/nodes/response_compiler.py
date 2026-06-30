@@ -17,9 +17,7 @@ def response_compiler_node(
 
     campaign_id = str(uuid4())
 
-    state["campaign_id"] = campaign_id
-
-    state["final_response"] = {
+    final_response = {
         "campaign_id": campaign_id,
         "whatsapp_copy": state.get("whatsapp_copy"),
         "instagram_caption": state.get("instagram_caption"),
@@ -28,4 +26,7 @@ def response_compiler_node(
         "quality_passed": state.get("quality_passed"),
     }
 
-    return state
+    return {
+        "campaign_id": campaign_id,
+        "final_response": final_response,
+    }

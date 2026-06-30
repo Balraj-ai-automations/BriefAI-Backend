@@ -15,10 +15,6 @@ def copy_writer_node(state: BriefAIState) -> BriefAIState:
     This node generates:
     - WhatsApp marketing message
     - Instagram caption
-
-    It reads the structured business profile and marketing strategy,
-    builds platform-specific prompts, sends them to the Mistral service,
-    and stores the generated copy back into the shared LangGraph state.
     """
 
     try:
@@ -70,20 +66,16 @@ def copy_writer_node(state: BriefAIState) -> BriefAIState:
             instagram_prompt
         )
 
-        # --------------------------------------------------
-        # Step 6: Update state
-        # --------------------------------------------------
-
-        state["whatsapp_copy"] = whatsapp_copy.strip()
-        state["instagram_caption"] = instagram_caption.strip()
-
         logger.info("Copy Writer node completed successfully.")
 
-        return state
+        return {
+            "whatsapp_copy": whatsapp_copy.strip(),
+            "instagram_caption": instagram_caption.strip(),
+        }
 
     except Exception as e:
         logger.exception("Copy Writer node failed.")
 
-        state["error"] = str(e)
-
-        return state
+        return {
+            "error": str(e),
+        }

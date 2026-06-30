@@ -18,23 +18,29 @@ def image_prompt_builder_node(
     1. Ask Mistral to build an optimized FLUX prompt.
     2. Generate the image using Hugging Face FLUX.
     3. Upload the image to Supabase Storage.
-    4. Save the permanent image URL in the LangGraph state.
+    4. Return only the updated state fields.
     """
 
     try:
         logger.info("Starting Image Prompt Builder node.")
 
-        # Step 1
+        # --------------------------------------------------
+        # Step 1: Read state
+        # --------------------------------------------------
         business_profile = state["business_profile"]
         strategy = state["strategy"]
 
-        # Step 2
+        # --------------------------------------------------
+        # Step 2: Build image prompt
+        # --------------------------------------------------
         prompt = build_image_prompt(
             business_profile=business_profile,
             strategy=strategy,
         )
 
-        # Step 3
+        # --------------------------------------------------
+        # Step 3: Generate prompt JSON using Mistral
+        # --------------------------------------------------
         response = mistral_service.generate(prompt)
 
         print("\n========== RAW MISTRAL RESPONSE ==========")
@@ -59,28 +65,36 @@ def image_prompt_builder_node(
             "1:1",
         )
 
-        # Step 4
+        # --------------------------------------------------
+        # Step 4: Generate image using FLUX
+        # --------------------------------------------------
         image_bytes = generate_image(
             prompt=positive_prompt,
             negative_prompt=negative_prompt,
             aspect_ratio=aspect_ratio,
         )
 
-        # Step 5
+        # --------------------------------------------------
+        # Step 5: Upload image to Supabase Storage
+        # --------------------------------------------------
         image_url = save_image_bytes(image_bytes)
-
-        # Step 6
-        state["image_prompt"] = positive_prompt
-        state["negative_prompt"] = negative_prompt
-        state["aspect_ratio"] = aspect_ratio
-        state["image_source"] = "huggingface"
-        state["image_url"] = image_url
 
         logger.info("Image Prompt Builder node completed successfully.")
 
-        return state
+        # --------------------------------------------------
+        # Step 6: Return only updated fields
+        # --------------------------------------------------
+        return {
+            "image_prompt": positive_prompt,
+            "negative_prompt": negative_prompt,
+            "aspect_ratio": aspect_ratio,
+            "image_source": "huggingface",
+            "image_url": image_url,
+        }
 
     except Exception as e:
         logger.exception("Image Prompt Builder node failed.")
-        state["error"] = str(e)
-        return state
+
+        return {
+            "error": str(e),
+        }

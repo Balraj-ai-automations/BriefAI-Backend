@@ -31,16 +31,16 @@ def strategy_planner_node(state: BriefAIState) -> BriefAIState:
         # Step 4: Parse JSON response
         strategy = json.loads(response)
 
-        # Step 5: Update state
-        state["strategy"] = strategy
-
         logger.info("Strategy Planner node completed successfully.")
 
-        return state
+        # Step 5: Return only updated fields
+        return {
+            "strategy": strategy,
+        }
 
     except Exception as e:
         logger.exception("Strategy Planner node failed.")
 
-        state["error"] = str(e)
-
-        return state
+        return {
+            "error": str(e),
+        }

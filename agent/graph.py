@@ -91,29 +91,36 @@ graph_builder.set_entry_point("input_parser")
 
 
 # --------------------------------------------------
-# Main Workflow
+# Main Workflow (Parallel Fan-out / Fan-in)
 # --------------------------------------------------
 
+# Input Parser -> Strategy Planner
 graph_builder.add_edge(
     "input_parser",
     "strategy_planner",
 )
 
+# Strategy Planner fans out into two parallel branches
 graph_builder.add_edge(
     "strategy_planner",
     "copy_writer",
 )
 
 graph_builder.add_edge(
-    "copy_writer",
+    "strategy_planner",
     "image_prompt_builder",
+)
+
+# Fan-in
+graph_builder.add_edge(
+    "copy_writer",
+    "quality_checker",
 )
 
 graph_builder.add_edge(
     "image_prompt_builder",
     "quality_checker",
 )
-
 
 # --------------------------------------------------
 # Conditional Retry Logic

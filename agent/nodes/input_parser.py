@@ -29,16 +29,16 @@ def input_parser_node(state: BriefAIState) -> BriefAIState:
         # Step 4: Parse JSON
         business_profile = json.loads(response)
 
-        # Step 5: Update state
-        state["business_profile"] = business_profile
-
         logger.info("Input Parser node completed successfully.")
 
-        return state
+        # Step 5: Return only updated fields
+        return {
+            "business_profile": business_profile,
+        }
 
     except Exception as e:
         logger.exception("Input Parser node failed.")
 
-        state["error"] = str(e)
-
-        return state
+        return {
+            "error": str(e),
+        }

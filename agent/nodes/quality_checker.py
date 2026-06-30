@@ -58,23 +58,21 @@ def quality_checker_node(state: BriefAIState) -> BriefAIState:
 
         review = json.loads(response)
 
-        # --------------------------------------------------
-        # Step 5: Update state
-        # --------------------------------------------------
-
-        state["quality_passed"] = review["passed"]
-        state["quality_feedback"] = review["feedback"]
-
-        # Optional (recommended)
-        state["quality_score"] = review["score"]
-
         logger.info("Quality Checker node completed successfully.")
 
-        return state
+        # --------------------------------------------------
+        # Step 5: Return only updated fields
+        # --------------------------------------------------
+
+        return {
+            "quality_passed": review["passed"],
+            "quality_feedback": review["feedback"],
+            "quality_score": review["score"],
+        }
 
     except Exception as e:
         logger.exception("Quality Checker node failed.")
 
-        state["error"] = str(e)
-
-        return state
+        return {
+            "error": str(e),
+        }
