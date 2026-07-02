@@ -2,7 +2,18 @@ from agent.graph import graph
 
 
 initial_state = {
-    "raw_input": {},
+    "raw_input": {
+    "user_id": "test-user-123",
+    "name": "Priya",
+    "product": "handmade cotton kurtis",
+    "usp": "pure cotton, hand block printed",
+    "price": "800 to 1500",
+    "offer": "Buy 2 get 10% off",
+    "buyer": "women aged 25-45",
+    "location": "Jaipur",
+    "occasion": "No occasion",
+    "goal": "Zyada bikri",
+},
     "app_language": "en",
     "ig_language": "en",
     "wa_language": "en",

@@ -1,32 +1,55 @@
-from uuid import uuid4
+"""
+Response Compiler Node
 
-from agent.state import BriefAIState
+Compiles the final API response and saves the campaign
+to Supabase.
+"""
+
+import logging
+
+from services.campaign_service import save_campaign
+
+logger = logging.getLogger(__name__)
 
 
-def response_compiler_node(
-    state: BriefAIState,
-) -> BriefAIState:
+def response_compiler_node(state: dict) -> dict:
     """
-    Compile the final API response.
+    Compile the final response.
 
-    This node gathers outputs from all previous nodes into
-    a single response object for the frontend.
+    This node gathers outputs from previous nodes,
+    saves the campaign, and returns a partial state update.
     """
 
-    print("Running Node 6: Response Compiler")
-
-    campaign_id = str(uuid4())
-
+    logger.info("Running Node 6: Response Compiler")
+    
     final_response = {
-        "campaign_id": campaign_id,
         "whatsapp_copy": state.get("whatsapp_copy"),
         "instagram_caption": state.get("instagram_caption"),
         "image_url": state.get("image_url"),
-        "strategy": state.get("strategy"),
-        "quality_passed": state.get("quality_passed"),
+        "tone": state["strategy"].get("tone"),
+        "campaign_angle": state["strategy"].get("campaign_angle"),
     }
 
+    campaign_id = None
+
+    try:
+        campaign_id = save_campaign(
+            state=state,
+            user_id=state["raw_input"]["user_id"],
+        )
+
+        logger.info(
+            "Campaign saved successfully: %s",
+            campaign_id,
+        )
+
+    except Exception:
+        logger.warning(
+            "Campaign save failed. Returning response anyway.",
+            exc_info=True,
+        )
+
     return {
-        "campaign_id": campaign_id,
         "final_response": final_response,
+        "campaign_id": campaign_id,
     }
